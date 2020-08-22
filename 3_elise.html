@@ -1,0 +1,118 @@
+<video width=400 height=300 id="vid" width="320" height="240" onclick="flip()">
+  <source src="elise.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
+<br>
+<div id=thumbs></div>
+<br>
+<div id="panel"></div>
+<input type="text" id="spd" value="1"/><br>
+<input type="text" id="A" value="1"/>
+<input type="text" id="B" value="1"/>
+<input type="button" value="Gen" onclick="gen_sheet()"/>
+<script>
+var M1=60,M2=120,M3=180;
+var arr = [
+	[ 4.0, 16.0, "1"],
+	[12.0, 22.0, "2"],
+	[22.0, 32.0, "3"],
+	[30.0, 40.0, "4"],
+	[38.0, 50.0, "5"],
+	[48.0, 56.0, "6"],
+	[   54.0, M1+10.0, "7"],
+	[M1+ 8.0, M1+22.0, "8"],
+	[0, 0, "br"],
+	[M1+20.0, M1+32.0, "9"],
+	[M1+30.0, M1+42.0, "10"],
+	[M1+40.0, M1+52.0, "11"],
+	[M1+50.0, M1+62.0, "12"],
+	[M1+60.0, M2+12.0, "13"],
+	[M2+10.0, M2+22.0, "14"],
+	[M2+20.0, M2+34.0, "15"],
+
+];
+
+var s1,s2;
+var vid=document.getElementById("vid");
+var panel=document.getElementById("panel");
+var spd=document.getElementById("spd");
+var Abox=document.getElementById("A");
+var Bbox=document.getElementById("B");
+
+var thumbs = document.getElementById("thumbs");
+
+var A=5, B=40;
+var generate_keypad;
+
+function seeked_func() {
+	generate_piano();
+	generateThumbnail();
+	A+=2; 
+	if(A<=B)vid.currentTime=A;
+}
+
+function get_arr_value(s){for(var i=0; i<arr.length; i++)if(arr[i][2]==s)return arr[i]}
+
+function gen_sheet(){
+  vid.removeEventListener('seeked', seeked_func);
+  thumbs.innerHTML = '';
+
+  A = get_arr_value(Abox.value)[0]
+  B = get_arr_value(Bbox.value)[1]
+  
+  //alert(A+':'+B)
+
+  vid.currentTime=A;
+  generate_keypad=1;
+ 
+  vid.addEventListener('seeked', seeked_func);
+}
+
+function generate_piano() {
+	if(generate_keypad){
+		var c = document.createElement("canvas");
+		var ctx = c.getContext("2d");
+		c.width = 320*2;
+		c.height = 100;
+		ctx.drawImage(vid, 0, -300, 320*2, 400);
+		thumbs.prepend(c);
+		generate_keypad=0;
+	}
+}
+
+function generateThumbnail() {
+  var c = document.createElement("canvas");
+  var ctx = c.getContext("2d");
+
+  c.width = 320*2;
+  c.height = 190;
+  ctx.drawImage(vid, 0, -50, 320*2, 400);
+  thumbs.prepend(c);
+}
+
+vid.controls=false;
+
+	for(var i=0; i<arr.length; i++){
+		if(arr[i][0]==0){
+			var b = document.createElement(arr[i][2]);
+			panel.appendChild(b);
+		}else{
+			var b = document.createElement("BUTTON");
+			b.innerHTML = arr[i][2];
+			b.setAttribute("onclick", "playAt("+arr[i][0]+", "+arr[i][1]+")");
+			panel.appendChild(b);
+		}
+	}
+
+function playAt(a,b){
+	s1=a, s2=b;
+	vid.playbackRate = spd.value;
+	vid.currentTime = s1;
+	vid.play();
+}
+
+function flip(){ if(vid.paused)vid.play(); else vid.pause() }
+
+vid.addEventListener('timeupdate', ()=>{if(vid.currentTime >= s2)playAt(s1,s2)});
+</script>
+
